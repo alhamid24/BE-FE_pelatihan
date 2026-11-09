@@ -22,6 +22,6 @@ export interface RegisterUserInput {
 }
 
 export interface UpdateUserData {
-    nama? : string;
+    name? : string;
     email? : string;
 }

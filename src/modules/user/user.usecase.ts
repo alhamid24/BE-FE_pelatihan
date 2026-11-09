@@ -2,14 +2,22 @@ import bcrypt from 'bcryptjs';
 
 import type { IUserRepository } from './user.repository.js';
 
+import type { User } from './user.model.js';
+
 import type {
     User,
-    RegisterUserInput
+    RegisterUserInput,
+    UpdateUserData
 } from './user.model.js';
 
-import { AppError } from '../../shared/errors/app-error.js';
+import type {
+    PaginationParams,
+    PaginatedResult
+}from '../../shared/pagination/pagination.model.js';
 
-import type { UpdateUserData } from './user.model.js';
+import { createPaginationResult} from '../../shared/pagination/pagination.util.js'
+
+import { AppError } from '../../shared/errors/app-error.js';
 
 export class RegisterUserUseCase {
 
@@ -79,7 +87,7 @@ export class UpdateUserUseCase {
     async execute(
         id : string,
         input : UpdateUserData
-    ): Promise<User> {
+    ): Promise <User> {
         //check existing
 
         const existingUSer = 
@@ -115,5 +123,41 @@ export class UpdateUserUseCase {
 
             return updateUser;
         }
+    }
+}
+
+export class DeleteUserUseCase {
+    constructor(
+        private readonly userRepository : IUserRepository
+    ) {}
+
+    async execute (id : string) : Promise <void> {
+        const deleted = await this.userRepository.delete(id);
+
+        if (!deleted) {
+            throw new AppError(
+                'user tidak di temukan',
+                404
+            );
+        }
+    }
+}
+
+export class GetAllUserUseCase {
+    
+    constructor (
+        private readonly userRepository: IUserRepository
+    ) {}
+
+    async execute (
+        params: PaginationParams
+    ): Promise<PaginatedResult<User>> {
+
+        const result = await this.userRepository.findAll(params);
+
+        return createPaginationResult (
+            result,
+            params
+        );
     }
 }

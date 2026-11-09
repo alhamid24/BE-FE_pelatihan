@@ -7,12 +7,16 @@ import type { IUserRepository } from './user.repository.js';
 import type {
     User,
     UserRecord,
-    CreateUserData
+    CreateUserData,
+    UpdateUserData 
 } from './user.model.js';
 
 import { AppError } from '../../shared/errors/app-error.js';
 
-import type { UpdateUserData } from './user.model.js';
+import {
+    PaginationParams,
+    PaginationData
+} from '../../shared/pagination/pagination.model.js';
 
 export class PostgresUserRepository
 implements IUserRepository {
@@ -168,5 +172,60 @@ implements IUserRepository {
 
             throw error;
         }
+    }
+
+    async delete (id : string): Promise<boolean> {
+         
+        const result = await this.db.query (
+            `
+            DELETE FROM users
+            WHERE id = $1
+            RETURNING id
+            `,
+            [id]
+        );
+
+        return result.rowCount !== null && result.rowCount > 0;
+    }
+
+    async findAll (
+        params: PaginationParams
+    ): Promise<PaginationData<User>> {
+
+        //get total data
+        const countResult = await this.db.query (
+            `
+            SELECT COUNT(*) AS total 
+            FROM users
+            `
+        );
+        
+        const totalItems = Number (
+            countResult.rows[0]?.total
+        )
+
+        //get paginated data
+        const result = await this.db.query(
+            `
+            SELECT
+                id,
+                name,
+                email,
+                created_at AS "createdAt"
+            FROM users
+            ORDER BY created_at DESC, id DESC
+            LIMIT $1
+            OFFSET $2
+            `,
+            [
+                params.limit,
+                params.offset
+            ]
+        );
+
+        return {
+            items: result.rows as User [],
+            totalItems
+        };
     }
 }

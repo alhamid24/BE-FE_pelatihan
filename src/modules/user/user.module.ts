@@ -9,8 +9,11 @@ import { createUserRoutes } from './user.route.js';
 import {
     RegisterUserUseCase,
     GetUserByIdUseCase,
-    UpdateUserUseCase
+    UpdateUserUseCase,
+    DeleteUserUseCase,
+    GetAllUserUseCase
 } from './user.usecase.js'
+
 
 // Repository
 const userRepository = new PostgresUserRepository(postgres);
@@ -28,11 +31,21 @@ const updateUserUseCase = new UpdateUserUseCase(
     userRepository
 );
 
+const deleteUserUseCase = new DeleteUserUseCase(
+    userRepository
+);
+
+const getAllUserUseCase = new GetAllUserUseCase (
+    userRepository
+)
+
 // Handler
 const userHandler = new UserHandler(
     registerUserUseCase,
     getUserByIdUseCase,
-    updateUserUseCase
+    updateUserUseCase,
+    deleteUserUseCase,
+    getAllUserUseCase
 );
 
 // Routes

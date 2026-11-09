@@ -5,7 +5,20 @@ import type {
     UpdateUserData
 } from './user.model.js';
 
+import type {
+    PaginationParams,
+    PaginationData
+} from '../../shared/pagination/pagination.model.js';
+
 export interface IUserRepository {
+
+    findAll (
+        params: PaginationParams
+    ): Promise<PaginationData<User>>;
+    
+    findById(
+        id: string
+    ): Promise<UserRecord | null>;
 
     findByEmail(
         email: string
@@ -15,12 +28,11 @@ export interface IUserRepository {
         data: CreateUserData
     ): Promise<User>;
 
-    findById(
-        id: string
-    ): Promise<UserRecord | null>;
 
     update(
         id : string, 
         data : UpdateUserData
     ): Promise<User | null>;
+
+    delete (id : string): Promise <boolean>;
 }
